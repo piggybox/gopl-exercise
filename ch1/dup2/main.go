@@ -26,7 +26,10 @@ func main() {
 				fmt.Fprintf(os.Stderr, "dup2: %v\n", err)
 				continue
 			}
-			countLines(f, counts)
+            
+            if countLines(f, counts) {
+                fmt.Printf("%v\n", arg)
+            }
 			f.Close()
 		}
 	}
@@ -37,11 +40,16 @@ func main() {
 	}
 }
 
-func countLines(f *os.File, counts map[string]int) {
+func countLines(f *os.File, counts map[string]int) bool {
+    flag := false
 	input := bufio.NewScanner(f)
 	for input.Scan() {
 		counts[input.Text()]++
+        if counts[input.Text()] > 1 {
+            flag = true
+        }
 	}
+    return flag
 	// NOTE: ignoring potential errors from input.Err()
 }
 
