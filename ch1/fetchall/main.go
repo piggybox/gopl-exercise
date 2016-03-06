@@ -27,16 +27,23 @@ func main() {
         DB:       0,  // use default DB
     })
     
-	ch := make(chan string)
+    count := 0
+	
+    ch := make(chan string)
+    
 	for _, url := range os.Args[1:] {
         val, err := client.Get(url).Result()
         if err == redis.Nil {
             go fetch(url, ch, client) // start a goroutine
-            fmt.Println(<-ch)
-        }else{
+            count ++
+        } else {
             fmt.Printf("%v  %s\n", val, url)
         }
 	}
+    
+    for i := 1; i <= count; i++ {
+        fmt.Println(<-ch)
+    }
     
 	fmt.Printf("%.2fs elapsed\n", time.Since(start).Seconds())
 }
