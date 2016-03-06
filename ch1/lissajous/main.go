@@ -33,7 +33,7 @@ var palette = []color.Color{color.RGBA{34, 139, 34, 0xff}, color.Black, color.Wh
 const (
 	greenIndex = 0 // first color in palette
 	blackIndex = 1 // next color in palette
-    whiteIndex = 2
+	whiteIndex = 2
 )
 
 func main() {

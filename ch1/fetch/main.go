@@ -12,22 +12,22 @@ import (
 	"io"
 	"net/http"
 	"os"
-    "strings"
+	"strings"
 )
 
 func main() {
 	for _, url := range os.Args[1:] {
-        if !strings.HasPrefix(url, "http://") {
-            url = "http://" + url
-        }
-        
+		if !strings.HasPrefix(url, "http://") {
+			url = "http://" + url
+		}
+
 		resp, err := http.Get(url)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "fetch: %v\n", err)
 			os.Exit(1)
 		}
-        
-        fmt.Printf("%v\n", resp.Status)
+
+		fmt.Printf("%v\n", resp.Status)
 
 		_, err = io.Copy(os.Stdout, resp.Body)
 		resp.Body.Close()
