@@ -14,21 +14,34 @@ import (
 	"net/http"
 	"os"
 	"time"
+    "gopkg.in/redis.v3"
+    "strconv"
 )
 
 func main() {
 	start := time.Now()
+    
+    client := redis.NewClient(&redis.Options{
+        Addr:     "localhost:6379",
+        Password: "", // no password set
+        DB:       0,  // use default DB
+    })
+    
 	ch := make(chan string)
 	for _, url := range os.Args[1:] {
-		go fetch(url, ch) // start a goroutine
+        val, err := client.Get(url).Result()
+        if err == redis.Nil {
+            go fetch(url, ch, client) // start a goroutine
+            fmt.Println(<-ch)
+        }else{
+            fmt.Printf("%v  %s\n", val, url)
+        }
 	}
-	for range os.Args[1:] {
-		fmt.Println(<-ch) // receive from channel ch
-	}
+    
 	fmt.Printf("%.2fs elapsed\n", time.Since(start).Seconds())
 }
 
-func fetch(url string, ch chan<- string) {
+func fetch(url string, ch chan<- string, client *redis.Client) {
 	start := time.Now()
 	resp, err := http.Get(url)
 	if err != nil {
@@ -43,6 +56,12 @@ func fetch(url string, ch chan<- string) {
 		return
 	}
 	secs := time.Since(start).Seconds()
+    
+    err = client.Set(url, strconv.FormatFloat(secs, 'f', 1, 64), 0).Err()
+    if err != nil {
+        panic(err)
+    }
+    
 	ch <- fmt.Sprintf("%.2fs  %7d  %s", secs, nbytes, url)
 }
 
